@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="assets\index.html" />
+    <None Remove="assets\quartzAdmin.js" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="assets\index.html" />
+    <EmbeddedResource Include="assets\quartzAdmin.js" />
+  </ItemGroup>
+
+  
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="Microsoft.AspNetCore.Hosting.Abstractions" Version="2.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="5.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="5.0.0" />
+    <PackageReference Include="Quartz" Version="3.3.2" />
+  </ItemGroup>
+  
+</Project>

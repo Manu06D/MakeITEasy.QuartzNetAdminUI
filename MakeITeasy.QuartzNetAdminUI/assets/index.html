@@ -1,0 +1,106 @@
+﻿<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <title>Job  xxxx</title>
+    <!--<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.2/css/bootstrap.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.24/css/dataTables.bootstrap4.min.css">-->
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs4-4.1.1/dt-1.10.24/b-1.7.0/r-2.2.7/rg-1.1.2/datatables.min.css" />
+
+</head>
+<body>
+    <table id="example2" class="display table table-striped table-bordered" style="width:100%">
+        <thead>
+            <tr><th>Group</th><th>Name</th><th>Description</th><th>Status</th><th>Last execution</th><th>Next execution</th><th>Repeat</th><th>Action</th></tr>
+        </thead>
+        <tbody>
+    </table>
+
+    <script type="text/javascript" src="https://cdn.datatables.net/v/bs4-4.1.1/jq-3.3.1/dt-1.10.24/b-1.7.0/r-2.2.7/rg-1.1.2/datatables.min.js"></script>
+
+    <script type="text/javascript" src="/quartzAdmin-ressources?%%RessourceGetParameter%%=quartzAdmin.js"></script>
+    <script>
+
+
+        var table = $('#example2').dataTable({
+            ajax: {
+                url: "/quartzAdmin-api?action=GetJobs&argument=",
+                dataSrc: function (json) {
+                    let result = new Array();
+                    json.Groups.forEach(group => {
+                        group.Jobs.forEach(job => {
+
+                            let a = new Array();
+                            a.push(group.Name);
+
+                            a.push(job.Name);
+                            a.push(job.Description);
+                            a.push(job.Status);
+                            a.push(job.LastExecution);
+                            a.push(job.NextExecution);
+                            a.push(job.Interval);
+                            a.push(job.Key);
+
+                            result.push(a);
+                        })
+
+                    });
+
+                    return result;
+                }
+            },
+            columnDefs: [
+                {
+                    "targets": [0],
+                    "visible": false,
+                    "searchable": false
+                },
+                {
+                    "targets": [7],
+                    render: function (data, type, row) {
+                        return '<button onclick="launchJob(\'' + data + '\')">Run!</button>';
+                    }
+                }
+            ],
+            rowGroup: {
+                dataSrc: function (row) {
+                    return row[0];
+                }
+            },
+            buttons: [
+                {
+                    text: 'Reload',
+                    action: function (e, dt, node, config) {
+                        dt.ajax.reload();
+                    }
+                }
+            ]
+            ,
+            dom: 'Bfrtip',
+        });
+
+        function launchJob(jobKey) {
+            fetch("/quartzAdmin-api?action=RunJob&argument=" + jobKey).then(function (response) {
+                if (response.ok) {
+                    var contentType = response.headers.get("content-type");
+
+                    if (contentType && contentType.indexOf("application/json") !== -1) {
+                        return response.json().then(function (json) {
+                            console.log(json);
+                        });
+                    } else {
+                        console.log("Missing JSON");
+                    }
+
+                } else {
+                    console.log('Mauvaise réponse du réseau');
+                }
+            })
+            .catch(function (error) {
+                console.log('Il y a eu un problème avec l\'opération fetch: ' + error.message);
+            });
+        }
+    </script>
+</body>
+</html>
