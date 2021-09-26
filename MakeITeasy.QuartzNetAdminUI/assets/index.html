@@ -4,8 +4,6 @@
 <head>
     <meta charset="utf-8" />
     <title>Job  xxxx</title>
-    <!--<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.2/css/bootstrap.css">
-    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.24/css/dataTables.bootstrap4.min.css">-->
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs4-4.1.1/dt-1.10.24/b-1.7.0/r-2.2.7/rg-1.1.2/datatables.min.css" />
 
 </head>
@@ -19,13 +17,13 @@
 
     <script type="text/javascript" src="https://cdn.datatables.net/v/bs4-4.1.1/jq-3.3.1/dt-1.10.24/b-1.7.0/r-2.2.7/rg-1.1.2/datatables.min.js"></script>
 
-    <script type="text/javascript" src="/quartzAdmin-ressources?%%RessourceGetParameter%%=quartzAdmin.js"></script>
+    <script type="text/javascript" src="?action=%%ActionRessourceNameGet%%&%%ActionRessourceGet%%=quartzAdmin.js"></script>
     <script>
 
 
         var table = $('#example2').dataTable({
             ajax: {
-                url: "/quartzAdmin-api?action=GetJobs&argument=",
+                url: "?action=api&apiName=GetJobs&argument=", 
                 dataSrc: function (json) {
                     let result = new Array();
                     json.Groups.forEach(group => {
@@ -81,7 +79,7 @@
         });
 
         function launchJob(jobKey) {
-            fetch("/quartzAdmin-api?action=RunJob&argument=" + jobKey).then(function (response) {
+            fetch("?action=api&apiName=RunJob&argument=" + jobKey).then(function (response) {
                 if (response.ok) {
                     var contentType = response.headers.get("content-type");
 
@@ -97,9 +95,9 @@
                     console.log('Mauvaise réponse du réseau');
                 }
             })
-            .catch(function (error) {
-                console.log('Il y a eu un problème avec l\'opération fetch: ' + error.message);
-            });
+                .catch(function (error) {
+                    console.log('Il y a eu un problème avec l\'opération fetch: ' + error.message);
+                });
         }
     </script>
 </body>

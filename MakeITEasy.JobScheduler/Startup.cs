@@ -84,10 +84,10 @@ namespace MakeITEasy.JobScheduler
                     await context.Response.WriteAsync("Hello World! 2");
                 });
 
-                await endpoints.MapQuartzNetAdminUI(
+                endpoints.MapQuartzNetAdminUI(
                     options =>
                     {
-                        options.UIPath = "/blabla";
+                        options.UIPath = "/jobs";
 
                     });
             });
