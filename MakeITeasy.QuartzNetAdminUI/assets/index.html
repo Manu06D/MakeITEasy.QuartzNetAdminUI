@@ -4,23 +4,61 @@
 <head>
     <meta charset="utf-8" />
     <title>Job  xxxx</title>
-    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs4-4.1.1/dt-1.10.24/b-1.7.0/r-2.2.7/rg-1.1.2/datatables.min.css" />
-
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.0.1/css/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs5/jq-3.6.0/dt-1.11.3/b-2.0.1/r-2.2.9/rg-1.1.3/datatables.min.css" />
 </head>
 <body>
+    <nav class="navbar navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Quartz Net UI</a>
+        </div>
+    </nav>
 
-    <div>
-        Current time : <span id="clockDisplay"></span>
-    </div>
-    <table id="example2" class="display table table-striped table-bordered" style="width:100%">
-        <thead>
-            <tr><th>Group</th><th>Name</th><th>Description</th><th>Status</th><th>Last execution</th><th>Next execution</th><th>Repeat</th><th>Action</th></tr>
-        </thead>
-        <tbody>
-    </table>
+    <section class="pt-0 pb-0">
+        <div class="jumbotron py-5">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div>
+                            Current time : <span id="clockDisplay"></span>
+                        </div>
+                        <table id="example2" class="display table table-striped table-bordered" style="width:100%">
+                            <thead>
+                                <tr><th>Group</th><th>Name</th><th>Description</th><th>Status</th><th>Last execution</th><th>Next execution</th><th>Repeat</th><th>Action</th></tr>
+                            </thead>
+                            <tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="">
+        <footer class="pt-4 pb-4 ">
+            <div class="container">
+                <div class="row text-center align-items-center">
+                    <div class="col mt-4 mt-lg-0 text-center">
+                        <ul class="nav justify-content-center">
+                            <li class="nav-item">
+                                <a class="nav-link active" href="#">GitHub</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="row mt-4">
+                    <div class="col text-center">
+                        © 2021 makeItEasy. All Rights Reserved
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </section>
 
-    <script type="text/javascript" src="https://cdn.datatables.net/v/bs4-4.1.1/jq-3.3.1/dt-1.10.24/b-1.7.0/r-2.2.7/rg-1.1.2/datatables.min.js"></script>
-    
+
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.0.1/js/bootstrap.bundle.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/v/bs5/jq-3.6.0/dt-1.11.3/b-2.0.1/r-2.2.9/rg-1.1.3/datatables.min.js"></script>
+
+
     <script type="text/javascript" src="?action=%%ActionRessourceNameGet%%&%%ActionRessourceGet%%=quartzAdmin.js"></script>
     <script>
 
