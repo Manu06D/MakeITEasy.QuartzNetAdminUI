@@ -33,7 +33,7 @@ namespace MakeITeasy.QuartzNetAdminUI.Extensions
             }
         }
 
-        public static async Task<List<TriggerInfo>> GetJobs(this IScheduler scheduler)
+        public static async Task<List<TriggerInfo>> GetTriggersInfo(this IScheduler scheduler)
         {
             List<TriggerInfo> result = new();
 

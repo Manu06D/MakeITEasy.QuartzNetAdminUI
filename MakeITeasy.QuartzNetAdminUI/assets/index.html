@@ -30,16 +30,7 @@
                         group.Jobs.forEach(job => {
 
                             let a = new Array();
-                            a.push(group.Name);
-
-                            a.push(job.Name);
-                            a.push(job.Description);
-                            a.push(job.Status);
-                            a.push(job.LastExecution);
-                            a.push(job.NextExecution);
-                            a.push(job.Interval);
-                            a.push(job.Key);
-
+                            a.push(group.Name, job.Name, job.Description, job.Status, job.LastExecution, job.NextExecution, job.Interval, job.Key);
                             result.push(a);
                         })
 
@@ -57,7 +48,20 @@
                 {
                     "targets": [7],
                     render: function (data, type, row) {
-                        return '<button onclick="performActionOnJob(\'runJob\',\'' + data + '\')">Run!</button><button onclick="performActionOnJob(\'pauseJob\',\'' + data + '\')">Pause!</button>';
+                        let actionName;
+                        let buttonActionText;
+
+                        if (row[3] == "paused") {
+                            actionName = "resumeJob";
+                            buttonActionText = "Resume";
+                        }
+                        else {
+                            actionName = "pauseJob";
+                            buttonActionText = "Pause";
+                        }
+
+                        console.log(row[3]);
+                        return '<button onclick="performActionOnJob(\'runJob\',\'' + data + '\')">Run!</button><button onclick="performActionOnJob(\'' + actionName + '\',\'' + data + '\')">' + buttonActionText + '</button>';
                     }
                 }
             ],
@@ -86,6 +90,7 @@
                     if (contentType && contentType.indexOf("application/json") !== -1) {
                         return response.json().then(function (json) {
                             console.log(json);
+                            table.DataTable().ajax.reload();
                         });
                     } else {
                         console.log("Missing JSON");
