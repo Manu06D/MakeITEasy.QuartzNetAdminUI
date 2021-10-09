@@ -12,7 +12,7 @@ using System.Linq;
 using System.Text.Json.Serialization;
 using System.Text.Json;
 using System.Threading.Tasks;
-using Quartz.Impl.Matchers;
+using MakeITeasy.QuartzNetAdminUI.Extensions;
 
 namespace MakeITeasy.QuartzNetAdminUI
 {
@@ -32,10 +32,10 @@ namespace MakeITeasy.QuartzNetAdminUI
 
         private readonly static Dictionary<string, Func<string, ISchedulerFactory, Task<string>>> ApiActions = new()
         {
-            { "GetJobs", async (x, y) => await GetJobs(x, y) },
-            { "RunJob", async (x, y) => await RunJob(x, y) }
+            { "GetJobs",  async (x, y) => await GetJobs(x, y) },
+            { "runJob",   async (x, y) => await RunJob(x, y) },
+            { "pauseJob", async (x, y) => await PauseJob(x, y) }
         };
-
 
         /// <summary>
         /// Here start the game
@@ -51,7 +51,7 @@ namespace MakeITeasy.QuartzNetAdminUI
             //todo check HasValue
             string lookupQueryActionName = Const.ConstDictionnary[nameof(Const.ActionRessourceGet)];
 
-            if(actionQuery.IsDefault())
+            if (actionQuery.IsDefault())
             {
                 await RenderDefaultPage(context);
             }
@@ -62,6 +62,25 @@ namespace MakeITeasy.QuartzNetAdminUI
             else if (actionQuery.Value.FirstOrDefault()?.Equals(Const.ConstDictionnary[nameof(Const.ActionApiGet)], StringComparison.InvariantCultureIgnoreCase) == true)
             {
                 await ApiHandler(queries[Const.ActionApiNameGet], context);
+            }
+        }
+
+        private static async Task RenderDefaultPage(HttpContext context)
+        {
+            string indexFile = await FileHelper.GetResourceFileAsync("index.html");
+
+            Dictionary<string, string> variables = new();
+
+            foreach (var dicoValue in Const.ConstDictionnary)
+            {
+                variables.TryAdd(dicoValue.Key, dicoValue.Value);
+            }
+
+            if (!string.IsNullOrEmpty(indexFile))
+            {
+                indexFile = StringHelpers.ReplacePercent(indexFile, variables);
+
+                await context.Response.WriteAsync(indexFile);
             }
         }
 
@@ -77,8 +96,7 @@ namespace MakeITeasy.QuartzNetAdminUI
 
         private async Task ApiHandler(string apiName, HttpContext httpContext)
         {
-
-            if (!string.IsNullOrEmpty(apiName))
+            if (! string.IsNullOrWhiteSpace(apiName))
             {
                 var actionArgument = httpContext.Request.Query.FirstOrDefault(x => x.Key.Equals(Const.ActionApiArgementNameGet, StringComparison.InvariantCultureIgnoreCase)).Value.ToString();
 
@@ -98,17 +116,7 @@ namespace MakeITeasy.QuartzNetAdminUI
 
             var executingJobs = await scheduler.GetCurrentlyExecutingJobs();
 
-            List<TriggerInfo> triggers = new();
-
-            await PerformActionOnTriggers(schedulerFactory, (groupName, trigger) => triggers.Add(new TriggerInfo()
-            {
-                Name = ((AbstractTrigger)trigger).Name,
-                GroupName = groupName,
-                Description = trigger?.Description,
-                Key = trigger.Key.ToString(),
-                LastExecution = trigger.GetPreviousFireTimeUtc().GetValueOrDefault(),
-                NextExecution = trigger.GetNextFireTimeUtc().GetValueOrDefault(),
-            }));
+            List<TriggerInfo> triggers = await scheduler.GetJobs();
 
             si.Groups.AddRange(triggers.GroupBy(x => x.GroupName, (key, group) => new ScheduleGroupInfo() { Name = key, Jobs = group.ToList() }).ToList());
 
@@ -132,73 +140,18 @@ namespace MakeITeasy.QuartzNetAdminUI
         {
             var scheduler = await schedulerFactory.GetScheduler();
 
-            var jobGroups = await scheduler.GetJobGroupNames();
-
-            foreach (var group in jobGroups)
-            {
-                ScheduleGroupInfo sgi = new();
-                sgi.Name = group;
-
-                var groupMatcher = GroupMatcher<JobKey>.GroupContains(group);
-                var jobKeys = await scheduler.GetJobKeys(groupMatcher);
-
-                foreach (var jobKey in jobKeys)
-                {
-                    var detail = await scheduler.GetJobDetail(jobKey);
-                    var triggers = await scheduler.GetTriggersOfJob(jobKey);
-
-                    var trigger = triggers.FirstOrDefault(x => x.Key.ToString().Equals(triggerKey, StringComparison.InvariantCultureIgnoreCase));
-
-                    if (trigger != null)
-                    {
-                        await scheduler.TriggerJob(trigger.JobKey, trigger.JobDataMap);
-                    }
-                }
-            }
+            await scheduler.PerformActionOnITrigger(triggerKey, async (x, y) => await x.TriggerJob(y.JobKey, y.JobDataMap));
 
             return JsonSerializer.Serialize(new { Result = "ok" });
         }
 
-        private static async Task PerformActionOnTriggers(ISchedulerFactory schedulerFactory, Action<string, ITrigger> action)
+        private static async Task<string> PauseJob(string triggerKey, ISchedulerFactory schedulerFactory)
         {
             var scheduler = await schedulerFactory.GetScheduler();
-            var jobGroups = await scheduler.GetJobGroupNames();
 
-            foreach (var group in jobGroups)
-            {
-                var groupMatcher = GroupMatcher<JobKey>.GroupContains(group);
-                var jobKeys = await scheduler.GetJobKeys(groupMatcher);
+            await scheduler.PerformActionOnITrigger(triggerKey, async (x, y) => await x.PauseTrigger(y.Key));
 
-                foreach (var jobKey in jobKeys)
-                {
-                    var detail = await scheduler.GetJobDetail(jobKey);
-                    var triggers = await scheduler.GetTriggersOfJob(jobKey);
-
-                    foreach (ITrigger trigger in triggers)
-                    {
-                        action(group, trigger);
-                    }
-                }
-            }
-        }
-
-        private static async Task RenderDefaultPage(HttpContext context)
-        {
-            string indexFile = await FileHelper.GetResourceFileAsync("index.html");
-
-            Dictionary<string, string> variables = new();
-
-            foreach (var dicoValue in Const.ConstDictionnary)
-            {
-                variables.TryAdd(dicoValue.Key, dicoValue.Value);
-            }
-
-            if (! string.IsNullOrEmpty(indexFile))
-            {
-                indexFile = StringHelpers.ReplacePercent(indexFile, variables);
-
-                await context.Response.WriteAsync(indexFile);
-            }
+            return JsonSerializer.Serialize(new { Result = "ok" });
         }
     }
 }

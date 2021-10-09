@@ -57,7 +57,7 @@
                 {
                     "targets": [7],
                     render: function (data, type, row) {
-                        return '<button onclick="launchJob(\'' + data + '\')">Run!</button>';
+                        return '<button onclick="performActionOnJob(\'runJob\',\'' + data + '\')">Run!</button><button onclick="performActionOnJob(\'pauseJob\',\'' + data + '\')">Pause!</button>';
                     }
                 }
             ],
@@ -78,8 +78,8 @@
             dom: 'Bfrtip',
         });
 
-        function launchJob(jobKey) {
-            fetch("?action=api&apiName=RunJob&argument=" + jobKey).then(function (response) {
+        function performActionOnJob(actionName, jobKey) {
+            fetch("?action=api&apiName=" + actionName + "&argument=" + jobKey).then(function (response) {
                 if (response.ok) {
                     var contentType = response.headers.get("content-type");
 

@@ -3,6 +3,7 @@
     public enum Status
     {
         Waiting,
+        Paused,
         Running
     }
 }
