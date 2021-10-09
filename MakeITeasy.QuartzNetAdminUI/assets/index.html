@@ -8,6 +8,10 @@
 
 </head>
 <body>
+
+    <div>
+        Current time : <span id="clockDisplay"></span>
+    </div>
     <table id="example2" class="display table table-striped table-bordered" style="width:100%">
         <thead>
             <tr><th>Group</th><th>Name</th><th>Description</th><th>Status</th><th>Last execution</th><th>Next execution</th><th>Repeat</th><th>Action</th></tr>
@@ -16,14 +20,14 @@
     </table>
 
     <script type="text/javascript" src="https://cdn.datatables.net/v/bs4-4.1.1/jq-3.3.1/dt-1.10.24/b-1.7.0/r-2.2.7/rg-1.1.2/datatables.min.js"></script>
-
+    
     <script type="text/javascript" src="?action=%%ActionRessourceNameGet%%&%%ActionRessourceGet%%=quartzAdmin.js"></script>
     <script>
 
 
         var table = $('#example2').dataTable({
             ajax: {
-                url: "?action=api&apiName=GetJobs&argument=", 
+                url: "?action=api&apiName=GetJobs&argument=",
                 dataSrc: function (json) {
                     let result = new Array();
                     json.Groups.forEach(group => {
@@ -46,6 +50,20 @@
                     "searchable": false
                 },
                 {
+                    "targets": [4],
+                    render: function (data, type, row) {
+                        let date = new Date(data);
+                        return date.getFullYear() > 1 ? new Date(data).toLocaleString() : "";
+                    }
+                },
+                {
+                    "targets": [5],
+                    render: function (data, type, row) {
+                        let date = new Date(data);
+                        return date.getFullYear() > 1 ? new Date(data).toLocaleString() : "";
+                    }
+                },
+                {
                     "targets": [7],
                     render: function (data, type, row) {
                         let actionName;
@@ -60,7 +78,6 @@
                             buttonActionText = "Pause";
                         }
 
-                        console.log(row[3]);
                         return '<button onclick="performActionOnJob(\'runJob\',\'' + data + '\')">Run!</button><button onclick="performActionOnJob(\'' + actionName + '\',\'' + data + '\')">' + buttonActionText + '</button>';
                     }
                 }
@@ -104,6 +121,18 @@
                     console.log('Il y a eu un problème avec l\'opération fetch: ' + error.message);
                 });
         }
+
+        function displayClock() {
+            var date = new Date();
+
+            document.getElementById("clockDisplay").innerText = date;
+            document.getElementById("clockDisplay").textContent = date;
+
+            setTimeout(displayClock, 1000);
+
+        }
+
+        displayClock();
     </script>
 </body>
 </html>
