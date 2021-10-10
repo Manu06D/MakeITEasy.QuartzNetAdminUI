@@ -19,10 +19,12 @@ namespace MakeITeasy.QuartzNetAdminUI
     internal class QuartzNetUIMiddleware
     {
         private readonly ISchedulerFactory _schedulerFactory;
+        private readonly QuartzNetAdminUIOptions _options;
 
-        public QuartzNetUIMiddleware(RequestDelegate next, ISchedulerFactory schedulerFactory)
+        public QuartzNetUIMiddleware(RequestDelegate next, ISchedulerFactory schedulerFactory, QuartzNetAdminUIOptions options)
         {
             _schedulerFactory = schedulerFactory;
+            _options = options;
         }
 
         private readonly Dictionary<string, Func<string, HttpContext, Task>> actionsByName = new()
@@ -50,15 +52,15 @@ namespace MakeITeasy.QuartzNetAdminUI
             var actionQuery = queries.FirstOrDefault(x => x.Key.Equals(Const.QueryAction, StringComparison.InvariantCultureIgnoreCase));
 
             //todo check HasValue
-            string lookupQueryActionName = Const.ConstDictionnary[nameof(Const.ActionRessourceGet)];
+            string lookupQueryActionName = Const.ConstDictionnary[nameof(Const.ActionResourceGet)];
 
             if (actionQuery.IsDefault())
             {
                 await RenderDefaultPage(context);
             }
-            else if (actionQuery.Value.FirstOrDefault()?.Equals(Const.ConstDictionnary[nameof(Const.ActionRessourceGet)], StringComparison.InvariantCultureIgnoreCase) == true)
+            else if (actionQuery.Value.FirstOrDefault()?.Equals(Const.ConstDictionnary[nameof(Const.ActionResourceGet)], StringComparison.InvariantCultureIgnoreCase) == true)
             {
-                await ResourceHandler(queries[Const.ActionRessourceNameGet], context);
+                await ResourceHandler(queries[Const.ActionResourceNameGet], context);
             }
             else if (actionQuery.Value.FirstOrDefault()?.Equals(Const.ConstDictionnary[nameof(Const.ActionApiGet)], StringComparison.InvariantCultureIgnoreCase) == true)
             {
@@ -66,7 +68,7 @@ namespace MakeITeasy.QuartzNetAdminUI
             }
         }
 
-        private static async Task RenderDefaultPage(HttpContext context)
+        private async Task RenderDefaultPage(HttpContext context)
         {
             string indexFile = await FileHelper.GetResourceFileAsync("index.html");
 
@@ -76,6 +78,8 @@ namespace MakeITeasy.QuartzNetAdminUI
             {
                 variables.TryAdd(dicoValue.Key, dicoValue.Value);
             }
+
+            variables.TryAdd(nameof(QuartzNetAdminUIOptions.PageTitle), _options?.PageTitle ?? string.Empty);
 
             if (!string.IsNullOrEmpty(indexFile))
             {

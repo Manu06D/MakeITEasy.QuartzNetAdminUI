@@ -15,7 +15,7 @@ namespace MakeITeasy.QuartzNetAdminUI
             var apiDelegate =
                     builder.CreateApplicationBuilder()
                         //.UseAuthentication()
-                        .UseMiddleware<QuartzNetUIMiddleware>()
+                        .UseMiddleware<QuartzNetUIMiddleware>(options)
                         .Build();
 
             builder.Map(options.UIPath, apiDelegate);

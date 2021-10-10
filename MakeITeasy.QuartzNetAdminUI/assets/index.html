@@ -3,14 +3,14 @@
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="utf-8" />
-    <title>Job  xxxx</title>
+    <title>%%PageTitle%%</title>
     <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.0.1/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs5/jq-3.6.0/dt-1.11.3/b-2.0.1/r-2.2.9/rg-1.1.3/datatables.min.css" />
 </head>
 <body>
     <nav class="navbar navbar-dark bg-dark">
         <div class="container-fluid">
-            <a class="navbar-brand" href="#">Quartz Net UI</a>
+            <a class="navbar-brand" href="#" onclick="tableReload();">%%PageTitle%%</a>
         </div>
     </nav>
 
@@ -22,9 +22,9 @@
                         <div>
                             Current time : <span id="clockDisplay"></span>
                         </div>
-                        <table id="example2" class="display table table-striped table-bordered" style="width:100%">
+                        <table id="mainTable" class="display table table-striped table-bordered" style="width:100%">
                             <thead>
-                                <tr><th>Group</th><th>Name</th><th>Description</th><th>Status</th><th>Last execution</th><th>Next execution</th><th>Repeat</th><th>Action</th></tr>
+                                <tr><th>Group</th><th>Name</th><th>Description</th><th>Status</th><th>Last execution</th><th>Next execution</th><th>Action</th></tr>
                             </thead>
                             <tbody>
                         </table>
@@ -54,28 +54,21 @@
         </footer>
     </section>
 
-
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.0.1/js/bootstrap.bundle.min.js"></script>
     <script type="text/javascript" src="https://cdn.datatables.net/v/bs5/jq-3.6.0/dt-1.11.3/b-2.0.1/r-2.2.9/rg-1.1.3/datatables.min.js"></script>
-
-
-    <script type="text/javascript" src="?action=%%ActionRessourceNameGet%%&%%ActionRessourceGet%%=quartzAdmin.js"></script>
-    <script>
-
-
-        var table = $('#example2').dataTable({
+    <script type="text/javascript" src="?action=%%ActionResourceGet%%&%%ActionResourceNameGet%%=quartzAdmin.js"></script>
+    <script defer>
+        var table = $('#mainTable').dataTable({
             ajax: {
                 url: "?action=api&apiName=GetJobs&argument=",
                 dataSrc: function (json) {
                     let result = new Array();
                     json.Groups.forEach(group => {
                         group.Jobs.forEach(job => {
-
                             let a = new Array();
-                            a.push(group.Name, job.Name, job.Description, job.Status, job.LastExecution, job.NextExecution, job.Interval, job.Key);
+                            a.push(group.Name, job.Name, job.Description, job.Status, job.LastExecution, job.NextExecution, job.Key);
                             result.push(a);
                         })
-
                     });
 
                     return result;
@@ -83,26 +76,22 @@
             },
             columnDefs: [
                 {
-                    "targets": [0],
-                    "visible": false,
-                    "searchable": false
+                    targets: [0],
+                    visible: false,
+                    searchable: false
                 },
                 {
-                    "targets": [4],
+                    targets: [3],
+                    className: 'dt-center'
+                },
+                {
+                    targets: [4, 5],
                     render: function (data, type, row) {
-                        let date = new Date(data);
-                        return date.getFullYear() > 1 ? new Date(data).toLocaleString() : "";
+                        return formatDateFromApi(data);
                     }
                 },
                 {
-                    "targets": [5],
-                    render: function (data, type, row) {
-                        let date = new Date(data);
-                        return date.getFullYear() > 1 ? new Date(data).toLocaleString() : "";
-                    }
-                },
-                {
-                    "targets": [7],
+                    targets: [6],
                     render: function (data, type, row) {
                         let actionName;
                         let buttonActionText;
@@ -138,14 +127,13 @@
         });
 
         function performActionOnJob(actionName, jobKey) {
-            fetch("?action=api&apiName=" + actionName + "&argument=" + jobKey).then(function (response) {
+            fetch("?action=%%ActionApiGet%%&%%ActionApiNameGet%%=" + actionName + "&%%APIArgumentName%%=" + jobKey).then(function (response) {
                 if (response.ok) {
                     var contentType = response.headers.get("content-type");
 
                     if (contentType && contentType.indexOf("application/json") !== -1) {
                         return response.json().then(function (json) {
-                            console.log(json);
-                            table.DataTable().ajax.reload();
+                            tableReload();
                         });
                     } else {
                         console.log("Missing JSON");
@@ -160,17 +148,11 @@
                 });
         }
 
-        function displayClock() {
-            var date = new Date();
-
-            document.getElementById("clockDisplay").innerText = date;
-            document.getElementById("clockDisplay").textContent = date;
-
-            setTimeout(displayClock, 1000);
-
+        function tableReload() {
+            table.DataTable().ajax.reload();
         }
 
-        displayClock();
+        displayClock("clockDisplay");
     </script>
 </body>
 </html>

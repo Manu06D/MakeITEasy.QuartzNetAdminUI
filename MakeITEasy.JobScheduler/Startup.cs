@@ -88,7 +88,7 @@ namespace MakeITEasy.JobScheduler
                     options =>
                     {
                         options.UIPath = "/jobs";
-
+                        //options.PageTitle = "Test XXXX";
                     });
             });
         }

@@ -8,8 +8,8 @@ namespace MakeITeasy.QuartzNetAdminUI
         public static string ActionApiArgementNameGet = "argument";
 
 
-        public static string ActionRessourceGet = "getRessource";
-        public static string ActionRessourceNameGet = "ressourceName";
+        public static string ActionResourceGet = "getResource";
+        public static string ActionResourceNameGet = "resourceName";
 
         public static string ActionApiGet = "api";
         public static string ActionApiNameGet = "apiName";
@@ -18,10 +18,11 @@ namespace MakeITeasy.QuartzNetAdminUI
 
         public static Dictionary<string, string> ConstDictionnary = new()
         {
-            { nameof(ActionRessourceGet), ActionRessourceGet },
-            { nameof(ActionRessourceNameGet), ActionRessourceNameGet },
+            { nameof(ActionResourceGet), ActionResourceGet },
+            { nameof(ActionResourceNameGet), ActionResourceNameGet },
             { nameof(ActionApiGet), ActionApiGet },
-            { nameof(ActionApiNameGet), ActionApiNameGet }
+            { nameof(ActionApiNameGet), ActionApiNameGet },
+            { nameof(APIArgumentName), APIArgumentName }
         };
     }
 }
