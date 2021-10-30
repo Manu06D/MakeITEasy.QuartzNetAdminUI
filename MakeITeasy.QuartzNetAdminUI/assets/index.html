@@ -3,48 +3,72 @@
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="utf-8" />
-    <title>Job  xxxx</title>
-    <!--<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.2/css/bootstrap.css">
-    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.24/css/dataTables.bootstrap4.min.css">-->
-    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs4-4.1.1/dt-1.10.24/b-1.7.0/r-2.2.7/rg-1.1.2/datatables.min.css" />
-
+    <title>%%PageTitle%%</title>
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.0.1/css/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs5/jq-3.6.0/dt-1.11.3/b-2.0.1/r-2.2.9/rg-1.1.3/datatables.min.css" />
 </head>
 <body>
-    <table id="example2" class="display table table-striped table-bordered" style="width:100%">
-        <thead>
-            <tr><th>Group</th><th>Name</th><th>Description</th><th>Status</th><th>Last execution</th><th>Next execution</th><th>Repeat</th><th>Action</th></tr>
-        </thead>
-        <tbody>
-    </table>
+    <nav class="navbar navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#" onclick="tableReload();">%%PageTitle%%</a>
+        </div>
+    </nav>
 
-    <script type="text/javascript" src="https://cdn.datatables.net/v/bs4-4.1.1/jq-3.3.1/dt-1.10.24/b-1.7.0/r-2.2.7/rg-1.1.2/datatables.min.js"></script>
+    <section class="pt-0 pb-0">
+        <div class="jumbotron py-5">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div>
+                            Current time : <span id="clockDisplay"></span>
+                        </div>
+                        <table id="mainTable" class="display table table-striped table-bordered" style="width:100%">
+                            <thead>
+                                <tr><th>Group</th><th>Name</th><th>Description</th><th>Status</th><th>Last execution</th><th>Next execution</th><th>Action</th></tr>
+                            </thead>
+                            <tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="">
+        <footer class="pt-4 pb-4 ">
+            <div class="container">
+                <div class="row text-center align-items-center">
+                    <div class="col mt-4 mt-lg-0 text-center">
+                        <ul class="nav justify-content-center">
+                            <li class="nav-item">
+                                <a class="nav-link active" href="#">GitHub</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="row mt-4">
+                    <div class="col text-center">
+                        © 2021 makeItEasy. All Rights Reserved
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </section>
 
-    <script type="text/javascript" src="/quartzAdmin-ressources?%%RessourceGetParameter%%=quartzAdmin.js"></script>
-    <script>
-
-
-        var table = $('#example2').dataTable({
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.0.1/js/bootstrap.bundle.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/v/bs5/jq-3.6.0/dt-1.11.3/b-2.0.1/r-2.2.9/rg-1.1.3/datatables.min.js"></script>
+    <script type="text/javascript" src="?action=%%ActionResourceGet%%&%%ActionResourceNameGet%%=quartzAdmin.js"></script>
+    <script defer>
+        var table = $('#mainTable').dataTable({
             ajax: {
-                url: "/quartzAdmin-api?action=GetJobs&argument=",
+                url: "?action=api&apiName=GetJobs&argument=",
                 dataSrc: function (json) {
                     let result = new Array();
                     json.Groups.forEach(group => {
                         group.Jobs.forEach(job => {
-
                             let a = new Array();
-                            a.push(group.Name);
-
-                            a.push(job.Name);
-                            a.push(job.Description);
-                            a.push(job.Status);
-                            a.push(job.LastExecution);
-                            a.push(job.NextExecution);
-                            a.push(job.Interval);
-                            a.push(job.Key);
-
+                            a.push(group.Name, job.Name, job.Description, job.Status, job.LastExecution, job.NextExecution, job.Key);
                             result.push(a);
                         })
-
                     });
 
                     return result;
@@ -52,14 +76,36 @@
             },
             columnDefs: [
                 {
-                    "targets": [0],
-                    "visible": false,
-                    "searchable": false
+                    targets: [0],
+                    visible: false,
+                    searchable: false
                 },
                 {
-                    "targets": [7],
+                    targets: [3],
+                    className: 'dt-center'
+                },
+                {
+                    targets: [4, 5],
                     render: function (data, type, row) {
-                        return '<button onclick="launchJob(\'' + data + '\')">Run!</button>';
+                        return formatDateFromApi(data);
+                    }
+                },
+                {
+                    targets: [6],
+                    render: function (data, type, row) {
+                        let actionName;
+                        let buttonActionText;
+
+                        if (row[3] == "paused") {
+                            actionName = "resumeJob";
+                            buttonActionText = "Resume";
+                        }
+                        else {
+                            actionName = "pauseJob";
+                            buttonActionText = "Pause";
+                        }
+
+                        return '<button onclick="performActionOnJob(\'runJob\',\'' + data + '\')">Run!</button><button onclick="performActionOnJob(\'' + actionName + '\',\'' + data + '\')">' + buttonActionText + '</button>';
                     }
                 }
             ],
@@ -80,14 +126,14 @@
             dom: 'Bfrtip',
         });
 
-        function launchJob(jobKey) {
-            fetch("/quartzAdmin-api?action=RunJob&argument=" + jobKey).then(function (response) {
+        function performActionOnJob(actionName, jobKey) {
+            fetch("?action=%%ActionApiGet%%&%%ActionApiNameGet%%=" + actionName + "&%%APIArgumentName%%=" + jobKey).then(function (response) {
                 if (response.ok) {
                     var contentType = response.headers.get("content-type");
 
                     if (contentType && contentType.indexOf("application/json") !== -1) {
                         return response.json().then(function (json) {
-                            console.log(json);
+                            tableReload();
                         });
                     } else {
                         console.log("Missing JSON");
@@ -97,10 +143,16 @@
                     console.log('Mauvaise réponse du réseau');
                 }
             })
-            .catch(function (error) {
-                console.log('Il y a eu un problème avec l\'opération fetch: ' + error.message);
-            });
+                .catch(function (error) {
+                    console.log('Il y a eu un problème avec l\'opération fetch: ' + error.message);
+                });
         }
+
+        function tableReload() {
+            table.DataTable().ajax.reload();
+        }
+
+        displayClock("clockDisplay");
     </script>
 </body>
 </html>
