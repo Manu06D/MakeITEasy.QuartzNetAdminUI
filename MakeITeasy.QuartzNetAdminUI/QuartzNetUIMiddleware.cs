@@ -15,12 +15,10 @@ namespace MakeITeasy.QuartzNetAdminUI
 {
     internal class QuartzNetUIMiddleware
     {
-        private const string waitArgument = "wait";
         private readonly ISchedulerFactory _schedulerFactory;
         private readonly QuartzNetAdminUIOptions _options;
 
-        private static string OkResponse = JsonSerializer.Serialize(new { Result = "ok" });
-        private static string KoResponse = JsonSerializer.Serialize(new { Result = "ko" });
+        private static readonly string OkResponse = JsonSerializer.Serialize(new { Result = "ok" });
 
         public QuartzNetUIMiddleware(RequestDelegate next, ISchedulerFactory schedulerFactory, QuartzNetAdminUIOptions options)
         {
@@ -39,8 +37,7 @@ namespace MakeITeasy.QuartzNetAdminUI
             { "runJob",   async (x, y) => await RunJob(x, y) },
             { "pauseJob", async (x, y) => await PauseJob(x, y) },
             { "resumeJob", async (x, y) => await ResumeJob(x, y) },
-            { "pauseAllJobs", async (x, y) => await PauseAllJobs(y, x) },
-            { "areAllJobPaused", async (_, y) => await AreAllJobPaused(y) },
+            { "pauseAllJobs", async (x, y) => await PauseAllJobs(y) },
         };
 
         /// <summary>
@@ -162,7 +159,7 @@ namespace MakeITeasy.QuartzNetAdminUI
             return OkResponse;
         }
 
-        private static async Task<string> PauseAllJobs(ISchedulerFactory schedulerFactory, string argument = "")
+        private static async Task<string> PauseAllJobs(ISchedulerFactory schedulerFactory)
         {
             IScheduler scheduler = await schedulerFactory.GetScheduler();
             List<TriggerInfo> triggers = await scheduler.GetTriggersInfo();
@@ -172,21 +169,7 @@ namespace MakeITeasy.QuartzNetAdminUI
                 await PauseJob(trigger.Key, schedulerFactory);
             }
 
-            if (argument.Trim().ToLowerInvariant() == waitArgument)
-            {
-                while ((await AreAllJobPaused(schedulerFactory)) == KoResponse)
-                {
-                    await Task.Delay(1000);
-                }
-            }
-
             return OkResponse;
-        }
-
-        private static async Task<string> AreAllJobPaused(ISchedulerFactory schedulerFactory)
-        {
-            IScheduler scheduler = await schedulerFactory.GetScheduler();
-            return (await scheduler.GetCurrentlyExecutingJobs()).Any() ? KoResponse : OkResponse;
         }
 
         private static async Task<string> ResumeJob(string triggerKey, ISchedulerFactory schedulerFactory)
