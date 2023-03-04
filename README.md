@@ -8,3 +8,26 @@ There's rest endpoints that provide all jobs information (specifically their sta
 
 
 ![image](https://user-images.githubusercontent.com/23009730/222890085-e68d8e73-83fc-44a6-bf26-c6d5b930dae6.png)
+
+## Configuration
+
+Open your startup.cs file and add the endpoint.
+
+```
+using MakeITeasy.QuartzNetAdminUI;
+...
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        {
+            app.UseEndpoints(async endpoints =>
+            {
+                ....
+                endpoints.MapQuartzNetAdminUI(
+                    options =>
+                    {
+                        options.UIPath = "/jobs";
+                        options.PageTitle = "My scheduled jobs";
+                    });
+            });
+        }
+
+```
