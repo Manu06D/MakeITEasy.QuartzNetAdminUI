@@ -1,18 +1,15 @@
-﻿using MakeITeasy.QuartzNetAdminUI.Helpers;
+﻿using MakeITeasy.QuartzNetAdminUI.Extensions;
+using MakeITeasy.QuartzNetAdminUI.Helpers;
 using MakeITeasy.QuartzNetAdminUI.Models;
-
 using Microsoft.AspNetCore.Http;
-
 using Quartz;
 using Quartz.Impl.Triggers;
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.Json.Serialization;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
-using MakeITeasy.QuartzNetAdminUI.Extensions;
 
 namespace MakeITeasy.QuartzNetAdminUI
 {
@@ -20,6 +17,8 @@ namespace MakeITeasy.QuartzNetAdminUI
     {
         private readonly ISchedulerFactory _schedulerFactory;
         private readonly QuartzNetAdminUIOptions _options;
+
+        private static readonly string OkResponse = JsonSerializer.Serialize(new { Result = "ok" });
 
         public QuartzNetUIMiddleware(RequestDelegate next, ISchedulerFactory schedulerFactory, QuartzNetAdminUIOptions options)
         {
@@ -37,7 +36,8 @@ namespace MakeITeasy.QuartzNetAdminUI
             { "GetJobs",  async (x, y) => await GetJobs(x, y) },
             { "runJob",   async (x, y) => await RunJob(x, y) },
             { "pauseJob", async (x, y) => await PauseJob(x, y) },
-            { "resumeJob", async (x, y) => await ResumeJob(x, y) }
+            { "resumeJob", async (x, y) => await ResumeJob(x, y) },
+            { "pauseAllJobs", async (x, y) => await PauseAllJobs(y) },
         };
 
         /// <summary>
@@ -101,7 +101,7 @@ namespace MakeITeasy.QuartzNetAdminUI
 
         private async Task ApiHandler(string apiName, HttpContext httpContext)
         {
-            if (! string.IsNullOrWhiteSpace(apiName))
+            if (!string.IsNullOrWhiteSpace(apiName))
             {
                 var actionArgument = httpContext.Request.Query.FirstOrDefault(x => x.Key.Equals(Const.ActionApiArgementNameGet, StringComparison.InvariantCultureIgnoreCase)).Value.ToString();
 
@@ -122,7 +122,7 @@ namespace MakeITeasy.QuartzNetAdminUI
             List<TriggerInfo> triggers = await scheduler.GetTriggersInfo();
 
             si.Groups.AddRange(triggers.GroupBy(x => x.GroupName, (key, group) => new ScheduleGroupInfo() { Name = key, Jobs = group.ToList() }).ToList());
-            
+
             var executingJobs = await scheduler.GetCurrentlyExecutingJobs();
 
             var runningJobs = executingJobs.Select(x => ((AbstractTrigger)x.Trigger).Name);
@@ -147,7 +147,7 @@ namespace MakeITeasy.QuartzNetAdminUI
 
             await scheduler.PerformActionOnITrigger(triggerKey, async (x, y) => await x.TriggerJob(y.JobKey, y.JobDataMap));
 
-            return JsonSerializer.Serialize(new { Result = "ok" });
+            return OkResponse;
         }
 
         private static async Task<string> PauseJob(string triggerKey, ISchedulerFactory schedulerFactory)
@@ -156,7 +156,20 @@ namespace MakeITeasy.QuartzNetAdminUI
 
             await scheduler.PerformActionOnITrigger(triggerKey, async (x, y) => await x.PauseTrigger(y.Key));
 
-            return JsonSerializer.Serialize(new { Result = "ok" });
+            return OkResponse;
+        }
+
+        private static async Task<string> PauseAllJobs(ISchedulerFactory schedulerFactory)
+        {
+            IScheduler scheduler = await schedulerFactory.GetScheduler();
+            List<TriggerInfo> triggers = await scheduler.GetTriggersInfo();
+
+            foreach (var trigger in triggers)
+            {
+                await PauseJob(trigger.Key, schedulerFactory);
+            }
+
+            return OkResponse;
         }
 
         private static async Task<string> ResumeJob(string triggerKey, ISchedulerFactory schedulerFactory)
@@ -165,7 +178,7 @@ namespace MakeITeasy.QuartzNetAdminUI
 
             await scheduler.PerformActionOnITrigger(triggerKey, async (x, y) => await x.ResumeTrigger(y.Key));
 
-            return JsonSerializer.Serialize(new { Result = "ok" });
+            return OkResponse;
         }
     }
 }
