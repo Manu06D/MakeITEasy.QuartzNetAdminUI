@@ -22,7 +22,7 @@ namespace MakeITEasy.JobScheduler.Jobs
 
             if(!int.TryParse(dataMap.GetString("Waiting"), out int millisecondsDelay))
             {
-                millisecondsDelay = new Random().Next(500, 5000);
+                millisecondsDelay = new Random().Next(5000, 50000);
             }
 
             _logger.LogInformation($"starting job {dataMap.GetString("JobIndex")}. waiting for {millisecondsDelay}");

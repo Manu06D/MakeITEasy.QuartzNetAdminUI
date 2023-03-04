@@ -120,6 +120,12 @@
                     action: function (e, dt, node, config) {
                         dt.ajax.reload();
                     }
+                },
+                {
+                    text: 'Pause All',
+                    action: function (e, dt, node, config) {
+                        performActionOnJob("pauseAllJobs", null);
+                    }
                 }
             ]
             ,
