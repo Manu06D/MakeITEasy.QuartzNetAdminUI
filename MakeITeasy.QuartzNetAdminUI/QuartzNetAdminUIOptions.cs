@@ -4,5 +4,7 @@
     {
         public string UIPath { get; set; } = "/quartz";
         public string PageTitle { get; set; } = "Quartz.net Admin UI";
+
+        public string Scripts { get; set; }
     }
 }

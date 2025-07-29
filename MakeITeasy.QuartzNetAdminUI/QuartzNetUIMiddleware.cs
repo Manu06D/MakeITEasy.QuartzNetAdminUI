@@ -80,6 +80,7 @@ namespace MakeITeasy.QuartzNetAdminUI
             }
 
             variables.TryAdd(nameof(QuartzNetAdminUIOptions.PageTitle), _options?.PageTitle ?? string.Empty);
+            variables.TryAdd(nameof(QuartzNetAdminUIOptions.Scripts), _options?.Scripts ?? string.Empty);
 
             if (!string.IsNullOrEmpty(indexFile))
             {
